@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SsamMobileApi.Data.Entities;
+namespace SSAMMobileApp.Data.Entities;
 
 /// <summary>
 /// Maps [SIGSSAMI_OS].[MTL].[MRDetail]. Column names, types and nullability

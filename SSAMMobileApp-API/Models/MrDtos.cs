@@ -1,4 +1,4 @@
-namespace SsamMobileApi.Models;
+namespace SSAMMobileApp.Models;
 
 /// <summary>
 /// Read-side contracts for MTL.MR / MTL.MRDetail. Property names mirror the DB

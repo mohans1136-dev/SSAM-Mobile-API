@@ -1,6 +1,6 @@
-using SsamMobileApi.Data.Entities;
+using SSAMMobileApp.Data.Entities;
 
-namespace SsamMobileApi.Models;
+namespace SSAMMobileApp.Models;
 
 /// <summary>Entity -> DTO projections. Kept in one place so the shape stays consistent.</summary>
 public static class MrMappings

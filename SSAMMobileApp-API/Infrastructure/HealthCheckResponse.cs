@@ -2,7 +2,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace SsamMobileApi.Infrastructure;
+namespace SSAMMobileApp.Infrastructure;
 
 /// <summary>
 /// Writes health-check results as JSON so callers (you, OutSystems, a monitor)

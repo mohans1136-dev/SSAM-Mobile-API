@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 using Asp.Versioning;
-using SsamMobileApi.Data;
-using SsamMobileApi.Infrastructure;
-using SsamMobileApi.Services;
+using SSAMMobileApp.Data;
+using SSAMMobileApp.Infrastructure;
+using SSAMMobileApp.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;

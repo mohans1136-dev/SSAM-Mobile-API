@@ -22,7 +22,7 @@ variables:
   azureSubscription: 'azure-svc-connection'      # <-- service connection name
   appServiceName: 'ssam-mobile-api'     # <-- your App Service name
   # Path to the API project relative to repo root
-  apiProject: 'src/SsamMobileApi/SsamMobileApi.csproj'
+  apiProject: 'SSAMMobileApp-API/SSAMMobileApp-API.csproj'
 
 stages:
 # ==========================================================================

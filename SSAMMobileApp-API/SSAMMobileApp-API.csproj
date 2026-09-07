@@ -5,6 +5,15 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 
+    <!-- Assembly / exe name. Must stay "SSAMMobileApp-API" so the build output is
+         SSAMMobileApp-API.exe at the path the AVD admin whitelisted. -->
+    <AssemblyName>SSAMMobileApp-API</AssemblyName>
+    <!-- A hyphen isn't valid in a C# namespace, so code uses "SSAMMobileApp". -->
+    <RootNamespace>SSAMMobileApp</RootNamespace>
+
+    <!-- Enables `dotnet user-secrets` for this project (local secrets only). -->
+    <UserSecretsId>49f942aa-e738-430a-8d25-34b17571e8e5</UserSecretsId>
+
     <!-- Emit XML doc comments so they show up in the OpenAPI document. -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- 1591: don't warn about missing XML comments on every public member. -->

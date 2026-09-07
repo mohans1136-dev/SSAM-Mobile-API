@@ -1,10 +1,10 @@
 using Asp.Versioning;
-using SsamMobileApi.Models;
-using SsamMobileApi.Services;
+using SSAMMobileApp.Models;
+using SSAMMobileApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace SsamMobileApi.Controllers;
+namespace SSAMMobileApp.Controllers;
 
 /// <summary>Read access to material requests (MTL.MR) and their lines (MTL.MRDetail).</summary>
 [ApiController]

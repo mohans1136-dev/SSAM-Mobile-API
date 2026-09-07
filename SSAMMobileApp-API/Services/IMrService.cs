@@ -1,6 +1,6 @@
-using SsamMobileApi.Models;
+using SSAMMobileApp.Models;
 
-namespace SsamMobileApi.Services;
+namespace SSAMMobileApp.Services;
 
 /// <summary>Read-side operations over MTL.MR / MTL.MRDetail.</summary>
 public interface IMrService

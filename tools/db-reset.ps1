@@ -3,7 +3,7 @@
 $ErrorActionPreference = 'Stop'
 $root     = Split-Path -Parent $PSScriptRoot
 $instance = '(localdb)\MSSQLLocalDB'
-$dbName   = 'SsamMobileApiLocal'
+$dbName   = 'SSAMMobileAppLocal'
 
 Write-Host "Starting LocalDB..."
 sqllocaldb start MSSQLLocalDB | Out-Null

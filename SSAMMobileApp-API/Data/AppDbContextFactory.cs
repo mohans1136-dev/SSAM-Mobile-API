@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
-namespace SsamMobileApi.Data;
+namespace SSAMMobileApp.Data;
 
 /// <summary>
 /// Design-time factory. The EF Core CLI tools (dotnet ef ...) use this to build

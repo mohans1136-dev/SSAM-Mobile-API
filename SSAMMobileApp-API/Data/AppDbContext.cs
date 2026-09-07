@@ -1,7 +1,7 @@
-using SsamMobileApi.Data.Entities;
+using SSAMMobileApp.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace SsamMobileApi.Data;
+namespace SSAMMobileApp.Data;
 
 /// <summary>
 /// EF Core database context - the gateway to the MS SQL database.

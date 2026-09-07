@@ -10,7 +10,7 @@ Push-Location $root
 try {
     $dirty = git status --porcelain
     if ($dirty) { Write-Warning "Uncommitted changes will NOT be in the zip:`n$dirty" }
-    git archive --format=zip --prefix=SSAM-Mobile-API/ -o $out HEAD
+    git archive --format=zip --prefix=SSAMMobileApp/ -o $out HEAD
 }
 finally { Pop-Location }
 

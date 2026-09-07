@@ -1,5 +1,5 @@
 /* Fake data for local development only. Never real client data. */
-USE SsamMobileApiLocal;
+USE SSAMMobileAppLocal;
 GO
 
 DELETE FROM MTL.MRDetail;

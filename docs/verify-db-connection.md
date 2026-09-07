@@ -24,23 +24,23 @@ Expected tail:
 
 ```
 Done. Connection string:
-  Server=(localdb)\MSSQLLocalDB;Database=SsamMobileApiLocal;Trusted_Connection=True;TrustServerCertificate=True;
+  Server=(localdb)\MSSQLLocalDB;Database=SSAMMobileAppLocal;Trusted_Connection=True;TrustServerCertificate=True;
 ```
 
 ### 2. Confirm the connection string the API will use
 
-Open `src/SsamMobileApi/appsettings.Development.json` and check:
+Open `SSAMMobileApp-API/appsettings.Development.json` and check:
 
 ```json
 "ConnectionStrings": {
-  "SqlDb": "Server=(localdb)\\MSSQLLocalDB;Database=SsamMobileApiLocal;Trusted_Connection=True;TrustServerCertificate=True;"
+  "SqlDb": "Server=(localdb)\\MSSQLLocalDB;Database=SSAMMobileAppLocal;Trusted_Connection=True;TrustServerCertificate=True;"
 }
 ```
 
 ### 3. Start the API
 
 ```powershell
-cd src\SsamMobileApi
+cd SSAMMobileApp-API
 dotnet run
 ```
 
@@ -60,7 +60,7 @@ curl http://localhost:5199/health/db
 ```
 
 or open `http://localhost:5199/health/db` in a browser, or use
-`src/SsamMobileApi/SsamMobileApi.http` in Visual Studio / VS Code ("Send
+`SSAMMobileApp-API/SSAMMobileApp-API.http` in Visual Studio / VS Code ("Send
 Request" above the `/health/db` line).
 
 ### 5. Read the result
@@ -75,7 +75,7 @@ Request" above the `/health/db` line).
       "name": "sql-db",
       "status": "Healthy",
       "description": "Database connection OK.",
-      "data": { "server": "(localdb)\\MSSQLLocalDB", "database": "SsamMobileApiLocal", "responseMs": 12 }
+      "data": { "server": "(localdb)\\MSSQLLocalDB", "database": "SSAMMobileAppLocal", "responseMs": 12 }
     }
   ]
 }
@@ -107,7 +107,7 @@ and, for `/mr/1`, its MRDetail lines.
 ### 1. Put the real connection string in user secrets (not in any file)
 
 ```powershell
-cd src\SsamMobileApi
+cd SSAMMobileApp-API
 dotnet user-secrets set "ConnectionStrings:SqlDb" "Server=REAL_SERVER;Database=REAL_DB;User Id=...;Password=...;Encrypt=True;TrustServerCertificate=True"
 ```
 
@@ -173,7 +173,7 @@ Common Azure causes of 503 here:
 
 ## How it works (for reference)
 
-`src/SsamMobileApi/Infrastructure/DatabaseHealthCheck.cs` is registered in
+`SSAMMobileApp-API/Infrastructure/DatabaseHealthCheck.cs` is registered in
 `Program.cs`:
 
 ```csharp

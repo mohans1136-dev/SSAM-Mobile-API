@@ -1,9 +1,9 @@
 using System.Diagnostics;
-using SsamMobileApi.Data;
+using SSAMMobileApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace SsamMobileApi.Infrastructure;
+namespace SSAMMobileApp.Infrastructure;
 
 /// <summary>
 /// Confirms the API can actually reach the SQL database by opening a connection

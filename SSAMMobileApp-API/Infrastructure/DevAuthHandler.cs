@@ -3,7 +3,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
-namespace SsamMobileApi.Infrastructure;
+namespace SSAMMobileApp.Infrastructure;
 
 /// <summary>
 /// LOCAL DEVELOPMENT ONLY. When enabled, every request is treated as an

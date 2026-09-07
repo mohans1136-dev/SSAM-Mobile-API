@@ -1,163 +1,193 @@
-# Migrating the project into the AVD
+# Migrating the code into the AVD project
 
-Goal: get this code into the Azure Virtual Desktop, open it in Visual Studio,
-point it at the **real** `[SIGSSAMI_OS]` database, build, run, and verify — then
-keep committing from inside the AVD.
+You already created an empty .NET project in the AVD:
 
-Pick **one** transfer method (A or B), then do the common steps.
-
----
-
-## A. Git clone (preferred — if the AVD can reach GitHub)
-
-Inside the AVD, in a terminal / Developer PowerShell:
-
-```powershell
-cd C:\Source                      # wherever you keep repos
-git clone https://github.com/mohans1136-dev/SSAM-Mobile-API.git
-cd SSAM-Mobile-API
+```
+P:\Core\SSAMMobileApp\                     solution folder
+P:\Core\SSAMMobileApp\SSAMMobileApp-API\   project folder
 ```
 
-You now have full history and can `git pull` / `git push` normally. Done —
-skip to **Common steps**.
+and asked the admin to allow this executable to run:
+
+```
+P:\Core\SSAMMobileApp\SSAMMobileApp-API\bin\Debug\net10.0\SSAMMobileApp-API.exe
+```
+
+This repo is deliberately structured the **same way** (solution `SSAMMobileApp`,
+project `SSAMMobileApp-API`, assembly `SSAMMobileApp-API`). So migrating = drop
+the repo's files on top of `P:\Core\SSAMMobileApp\` and delete the leftover
+template files. The exe name and path never change.
+
+> **Check with the admin how the allow-listing works.** If it's by **path** or by
+> **publisher/signing**, you're fine — rebuild as often as you like. If it's by
+> **file hash**, every rebuild produces a new hash and re-breaks it; ask for a
+> path-based rule on that folder instead.
 
 ---
 
-## B. File copy (AVD is locked down / no GitHub)
+## Step 1 — Build the transfer zip (outside the AVD)
 
-1. **Outside the AVD**, from the repo root:
+From the repo root:
+
+```powershell
+git pull                                              # get the latest
+powershell -ExecutionPolicy Bypass -File tools\bundle.ps1
+```
+
+This writes `ssam-mobile-api.zip`. Its contents sit under a top folder
+`SSAMMobileApp/` that mirrors `P:\Core\SSAMMobileApp\` exactly:
+
+```
+SSAMMobileApp/
+├─ SSAMMobileApp.sln
+├─ SSAMMobileApp-API/            (Program.cs, Controllers/, Services/, Data/, ...)
+├─ db/  docs/  tools/  .config/
+├─ azure-pipelines.yml  .gitignore  README.md
+```
+
+---
+
+## Step 2 — Copy it in and overlay (inside the AVD)
+
+1. Copy `ssam-mobile-api.zip` into the AVD (clipboard paste into an Explorer
+   window, or the AVD file-transfer feature).
+2. **Close Visual Studio** (so no files are locked).
+3. Extract the zip somewhere temporary, e.g. `C:\Temp\SSAMMobileApp\`.
+4. Copy the **contents** of that `SSAMMobileApp\` folder into
+   `P:\Core\SSAMMobileApp\`, letting it **overwrite** existing files
+   (`Program.cs`, `appsettings*.json`, `.csproj`, `.sln`, `launchSettings.json`).
+5. Delete the template files the repo doesn't include:
 
    ```powershell
-   powershell -ExecutionPolicy Bypass -File tools\bundle.ps1
+   Remove-Item P:\Core\SSAMMobileApp\SSAMMobileApp-API\WeatherForecast.cs
+   Remove-Item P:\Core\SSAMMobileApp\SSAMMobileApp-API\Controllers\WeatherForecastController.cs
    ```
 
-   Writes `ssam-mobile-api.zip` (~38 KB) containing only committed files, with
-   the correct folder structure, under a top folder `SSAM-Mobile-API/`.
+6. If your solution file is `SSAMMobileApp.slnx` (not `.sln`), delete it and keep
+   the `SSAMMobileApp.sln` from the zip — the project reference inside is the
+   same.
 
-2. Copy `ssam-mobile-api.zip` into the AVD (clipboard paste into an Explorer
-   window, or the AVD's file-transfer feature).
-
-3. **Inside the AVD**, extract it, e.g. to `C:\Source\SSAM-Mobile-API`.
-
-> Want git history too? Instead of the zip, copy the **entire project folder
-> including its hidden `.git` directory** (select the folder in Explorer,
-> Ctrl+C, paste). Then `git remote -v` still works and you can push.
->
-> If you only copied the zip, you can still connect it to GitHub later inside
-> the AVD:
-> ```powershell
-> git init
-> git remote add origin https://github.com/mohans1136-dev/SSAM-Mobile-API.git
-> git fetch origin
-> git reset --soft origin/main
-> ```
+> The repo's `.csproj` sets `<UserSecretsId>` to a fixed GUID. If you'd already
+> run `dotnet user-secrets` against the old stub, those values are now under a
+> different id — just set them again in Step 5.
 
 ---
 
-## Common steps (after A or B)
+## Step 3 — Restore
 
-### 1. Open in Visual Studio
-
-Open `SsamMobileApi.slnx` (VS 2022 17.10+) or the folder in VS Code / Rider.
-
-### 2. Restore packages
+Open `P:\Core\SSAMMobileApp\SSAMMobileApp.sln` in Visual Studio, then:
 
 ```powershell
+cd P:\Core\SSAMMobileApp
 dotnet restore
+dotnet tool restore        # the `dotnet ef` CLI, for Step 6
 ```
 
-or right-click the solution → **Restore NuGet Packages**. Every version is
-pinned in `src/SsamMobileApi/SsamMobileApi.csproj`, so you get exactly what was
-tested. If the AVD has no nuget.org access, see README section 8.
+Package versions are pinned in `SSAMMobileApp-API\SSAMMobileApp-API.csproj`. If
+the AVD can't reach nuget.org, see README section 8 (internal feed, or carry a
+`nuget-packages` folder in).
 
-### 3. Restore the EF CLI tool (for later scaffolding)
+---
 
-```powershell
-dotnet tool restore
-```
-
-### 4. Point at the real database
-
-Never put the real connection string in a file. Use user secrets — from
-`src\SsamMobileApi\`:
-
-```powershell
-dotnet user-secrets set "ConnectionStrings:SqlDb" "Server=REAL_SERVER;Database=SIGSSAMI_OS;Encrypt=True;TrustServerCertificate=True;Authentication=Active Directory Integrated"
-```
-
-(Use `User Id=...;Password=...` instead of `Authentication=...` if it's a SQL
-login. Ask the DBA for the exact string.)
-
-User secrets override `appsettings.Development.json`, so the LocalDB string
-there is ignored once this is set.
-
-### 5. Decide on auth for local running
-
-`appsettings.Development.json` has `"DevAuth": { "Enabled": true }` — leave it
-**on** to run without an Entra token while you wire things up. Set it to
-`false` once you have a real token and want to test the real security path.
-
-(It can never activate outside the Development environment, so it's safe to
-leave on locally.)
-
-### 6. Build
+## Step 4 — Build and confirm the exe path
 
 ```powershell
 dotnet build
 ```
 
-Expected: `Build succeeded`.
-
-### 7. Verify the real schema matches the entities
-
-The entities in `Data/Entities/MR.cs` and `MRDetail.cs` were built from
-screenshots. Confirm they match the live DB:
+Expect `Build succeeded`, then confirm the whitelisted file exists:
 
 ```powershell
-dotnet ef dbcontext scaffold "Name=ConnectionStrings:SqlDb" Microsoft.EntityFrameworkCore.SqlServer `
-  --schema MTL --table MTL.MR --table MTL.MRDetail `
-  --output-dir Data/_ScaffoldCheck --context ScaffoldCheckContext --context-dir Data/_ScaffoldCheck `
-  --namespace SsamMobileApi.Data._ScaffoldCheck --context-namespace SsamMobileApi.Data._ScaffoldCheck `
-  --data-annotations --force
+Test-Path P:\Core\SSAMMobileApp\SSAMMobileApp-API\bin\Debug\net10.0\SSAMMobileApp-API.exe
 ```
 
-Compare the generated classes under `Data/_ScaffoldCheck/` with the hand-written
-`MR.cs` / `MRDetail.cs` (column names, types, nullability, identity, FK). Fix the
-hand-written ones if anything differs, then **delete `Data/_ScaffoldCheck/`** —
-it's only a diff aid, not part of the build.
-
-### 8. Run
-
-```powershell
-dotnet run --project src\SsamMobileApi
-```
-
-Then open:
-
-- `http://localhost:5199/health/db` → `"status": "Healthy"` means the API
-  reached `SIGSSAMI_OS`.
-- `http://localhost:5199/scalar` → try `GET /api/v1/mr` against real data.
-- `http://localhost:5199/api/v1/mr/{id}` → a real MR with its detail lines.
-
-If `/health/db` is `Unhealthy`, the `error` field says why (bad server name,
-login failure, firewall). See `docs/verify-db-connection.md`.
-
-### 9. Commit from inside the AVD
-
-```powershell
-git add -A
-git commit -m "..."
-git push        # if the AVD can reach GitHub
-```
-
-If the AVD can't push, run `tools\bundle.ps1` inside the AVD and carry the zip
-back out, or copy the changed files back.
+Must print `True`. (Visual Studio's default F5 build produces the same path.)
 
 ---
 
-## What NOT to bring across
+## Step 5 — Point at the real database
 
-- `bin/`, `obj/` — rebuilt locally (already excluded from the zip).
-- User secrets — they live in `%APPDATA%\Microsoft\UserSecrets\`, set them fresh
+Never put the real connection string in a file. Use user secrets — from
+`P:\Core\SSAMMobileApp\SSAMMobileApp-API\`:
+
+```powershell
+dotnet user-secrets set "ConnectionStrings:SqlDb" "Server=REAL_SERVER;Database=SIGSSAMI_OS;Encrypt=True;TrustServerCertificate=True;Authentication=Active Directory Integrated"
+```
+
+Use `User Id=...;Password=...` instead of `Authentication=...` for a SQL login.
+Ask the DBA for the exact string.
+
+User secrets override `appsettings.Development.json`, so the LocalDB string there
+is ignored once this is set.
+
+Leave `"DevAuth": { "Enabled": true }` in `appsettings.Development.json` **on**
+for now — it lets you call secured endpoints without an Entra token while wiring
+up. It can never activate outside the Development environment. Set it `false`
+once you have a real token to test.
+
+---
+
+## Step 6 — Verify the entities match the real schema
+
+`Data/Entities/MR.cs` and `MRDetail.cs` were built from screenshots. Confirm
+against the live DB by scaffolding into a throwaway folder and diffing:
+
+```powershell
+cd P:\Core\SSAMMobileApp\SSAMMobileApp-API
+dotnet ef dbcontext scaffold "Name=ConnectionStrings:SqlDb" Microsoft.EntityFrameworkCore.SqlServer `
+  --schema MTL `
+  --output-dir Data/_ScaffoldCheck --context-dir Data/_ScaffoldCheck `
+  --context ScaffoldCheckContext `
+  --namespace SSAMMobileApp.Data._ScaffoldCheck `
+  --context-namespace SSAMMobileApp.Data._ScaffoldCheck `
+  --data-annotations --force
+```
+
+Compare the generated `MR` / `MRDetail` with the hand-written ones — column
+names, types, nullability, identity, the FK. Fix the hand-written files if
+anything differs (keep the exact names, including `OrderRecjectedBy`). Then
+**delete `Data/_ScaffoldCheck/`** — it's a diff aid, not part of the build.
+
+---
+
+## Step 7 — Run and verify the DB connection
+
+```powershell
+dotnet run --project P:\Core\SSAMMobileApp\SSAMMobileApp-API
+```
+
+Then, in a browser or a second terminal:
+
+- `http://localhost:5199/health/db` → `"status": "Healthy"` means the API
+  reached `SIGSSAMI_OS`. If `Unhealthy`, the `error` field says why
+  (bad server, login, firewall) — see `docs/verify-db-connection.md`.
+- `http://localhost:5199/scalar` → interactive console; try `GET /api/v1/mr`.
+- `http://localhost:5199/api/v1/mr/{id}` → a real MR with its detail lines.
+
+---
+
+## Step 8 — Get changes back out of the AVD
+
+If the AVD **can** reach github.com:
+
+```powershell
+cd P:\Core\SSAMMobileApp
+git init
+git remote add origin https://github.com/mohans1136-dev/SSAM-Mobile-API.git
+git fetch origin
+git reset --soft origin/main          # adopt history without touching your files
+git add -A && git commit -m "..." && git push
+```
+
+If it **can't**: run `powershell -ExecutionPolicy Bypass -File tools\bundle.ps1`
+inside the AVD, carry `ssam-mobile-api.zip` back out, extract over your local
+repo, then commit and push from outside.
+
+---
+
+## What NOT to carry across
+
+- `bin/`, `obj/` — rebuilt on each side (already excluded from the zip).
+- User secrets — they live in `%APPDATA%\Microsoft\UserSecrets\`; set them fresh
   in each environment.
-- Any real connection string, token, or client data — keep those in the AVD only.
+- Any real connection string, token, or client data — those stay in the AVD only.

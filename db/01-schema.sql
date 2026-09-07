@@ -17,11 +17,11 @@
    Rebuild:  powershell -ExecutionPolicy Bypass -File tools\db-reset.ps1
    ===================================================================== */
 
-IF DB_ID('SsamMobileApiLocal') IS NULL
-    CREATE DATABASE SsamMobileApiLocal;
+IF DB_ID('SSAMMobileAppLocal') IS NULL
+    CREATE DATABASE SSAMMobileAppLocal;
 GO
 
-USE SsamMobileApiLocal;
+USE SSAMMobileAppLocal;
 GO
 
 IF SCHEMA_ID('MTL') IS NULL

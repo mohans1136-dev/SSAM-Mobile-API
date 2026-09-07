@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace SsamMobileApi.Infrastructure;
+namespace SSAMMobileApp.Infrastructure;
 
 /// <summary>
 /// Converts any unhandled exception into a clean RFC 7807 problem+json response

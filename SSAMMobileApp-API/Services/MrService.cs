@@ -1,8 +1,8 @@
-using SsamMobileApi.Data;
-using SsamMobileApi.Models;
+using SSAMMobileApp.Data;
+using SSAMMobileApp.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace SsamMobileApi.Services;
+namespace SSAMMobileApp.Services;
 
 public class MrService(AppDbContext db) : IMrService
 {

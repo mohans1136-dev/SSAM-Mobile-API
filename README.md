@@ -9,13 +9,13 @@ Service via Azure DevOps, consumed by an OutSystems app using Entra ID
 ## 1. What's in here
 
 ```
-SSAM-Mobile-API/
-├─ SsamMobileApi.slnx                   Solution file
+SSAMMobileApp/
+├─ SSAMMobileApp.sln                   Solution file
 ├─ azure-pipelines.yml                  Azure DevOps CI/CD pipeline
 ├─ .config/dotnet-tools.json            Pins the `dotnet ef` CLI version
 ├─ .gitignore
-└─ src/SsamMobileApi/
-   ├─ SsamMobileApi.csproj              Project + NuGet package versions
+└─ SSAMMobileApp-API/
+   ├─ SSAMMobileApp-API.csproj              Project + NuGet package versions
    ├─ Program.cs                        App startup / all wiring
    ├─ appsettings.json                  Config template (no secrets)
    ├─ appsettings.Development.json       Local dev overrides
@@ -51,30 +51,24 @@ names. `db/01-schema.sql` builds the same two tables in LocalDB.
 
 ## 2. Moving this code into the AVD
 
-The real code and client data live in the Azure Virtual Desktop. This repo was
-built outside it, so you need to transfer the files in. Pick whichever the AVD
-session policy allows:
+The real code and client data live in the Azure Virtual Desktop. This repo is
+structured to **match the AVD project exactly** — solution `SSAMMobileApp`,
+project folder `SSAMMobileApp-API/`, assembly `SSAMMobileApp-API` — so the build
+output stays `SSAMMobileApp-API.exe` at the path the admin whitelisted:
 
-| Method | How |
-| --- | --- |
-| **Clipboard file copy** (most AVD setups) | Select all files in this folder in Explorer, Ctrl+C, paste into the empty project folder in the AVD. |
-| **Zip via clipboard** | Run `powershell -ExecutionPolicy Bypass -File tools\bundle.ps1` — it writes `ssam-mobile-api.zip` with `bin/obj/.git` excluded. Copy that one file in and extract. |
-| **Text-only clipboard** | Recreate each file by hand in Visual Studio using the tree above, pasting file contents one at a time. Start with `.csproj`, then `Program.cs`, then the folders. |
+```
+P:\Core\SSAMMobileApp\SSAMMobileApp-API\bin\Debug\net10.0\SSAMMobileApp-API.exe
+```
 
-Full walkthrough (clone vs zip, restore, point at the real DB, verify, push back): **[docs/migrate-to-avd.md](docs/migrate-to-avd.md)**.
+That means transferring this repo into `P:\Core\SSAMMobileApp\` is a plain folder
+overwrite. **Do not rename the project, the folder, or the assembly** or the
+whitelist breaks.
 
-### After the files are in the AVD
+Full step-by-step (zip transfer, replacing the stub project, restore, point at
+the real DB, verify, push back): **[docs/migrate-to-avd.md](docs/migrate-to-avd.md)**.
 
-1. Open the `.slnx` (or the `.csproj`) in Visual Studio.
-2. Right-click the solution → **Restore NuGet Packages** (or `dotnet restore`).
-   All package versions are pinned in the `.csproj`, so you get exactly what was
-   tested here.
-3. Build. If the AVD has no internet access to nuget.org, see section 8.
-4. Set the local connection string and Entra ID values (section 3).
-
-> The `.csproj` is the source of truth for dependencies. If you paste files
-> individually, paste the `.csproj` **first** and restore before adding the rest,
-> so IntelliSense resolves types as you go.
+Dependencies are pinned in `SSAMMobileApp-API/SSAMMobileApp-API.csproj`, so a
+`dotnet restore` in the AVD gives exactly what was tested here.
 
 ---
 
@@ -86,7 +80,7 @@ variables** (Azure).
 
 ### Local development
 
-From `src/SsamMobileApi/`:
+From `SSAMMobileApp-API/`:
 
 ```bash
 dotnet user-secrets init
@@ -135,7 +129,7 @@ tools/db-reset.ps1   drops + rebuilds + seeds the local DB
 3. Rebuild: `powershell -ExecutionPolicy Bypass -File tools\db-reset.ps1`
 
 `appsettings.Development.json` already points at
-`Server=(localdb)\MSSQLLocalDB;Database=SsamMobileApiLocal;...`.
+`Server=(localdb)\MSSQLLocalDB;Database=SSAMMobileAppLocal;...`.
 
 ### Running secured endpoints without Entra ID
 
@@ -163,7 +157,7 @@ run migrations against it.
 
 ### When the real schema changes, or to add more tables
 
-Re-generate from the live DB instead of hand-editing. Run from `src/SsamMobileApi/`:
+Re-generate from the live DB instead of hand-editing. Run from `SSAMMobileApp-API/`:
 
 ```bash
 dotnet tool restore
@@ -171,8 +165,8 @@ dotnet ef dbcontext scaffold "Name=ConnectionStrings:SqlDb" Microsoft.EntityFram
   --context AppDbContext \
   --context-dir Data \
   --output-dir Data/Entities \
-  --namespace SsamMobileApi.Data.Entities \
-  --context-namespace SsamMobileApi.Data \
+  --namespace SSAMMobileApp.Data.Entities \
+  --context-namespace SSAMMobileApp.Data \
   --schema MTL \
   --no-onconfiguring \
   --data-annotations \
@@ -282,7 +276,7 @@ App Service on `main`.
 ## 8. Running locally
 
 ```bash
-cd src/SsamMobileApi
+cd SSAMMobileApp-API
 dotnet run
 ```
 
@@ -308,7 +302,7 @@ Healthy response:
   "status": "Healthy",
   "checks": [
     { "name": "sql-db", "status": "Healthy", "description": "Database connection OK.",
-      "data": { "server": "(localdb)\\MSSQLLocalDB", "database": "SsamMobileApiLocal", "responseMs": 12 } }
+      "data": { "server": "(localdb)\\MSSQLLocalDB", "database": "SSAMMobileAppLocal", "responseMs": 12 } }
   ]
 }
 ```
@@ -336,7 +330,7 @@ Options:
 
 ## 9. Suggested next steps
 
-- Add an xUnit test project (`tests/SsamMobileApi.Tests`) with
+- Add an xUnit test project (`tests/SSAMMobileApp-API.Tests`) with
   `WebApplicationFactory<Program>` integration tests — the pipeline already runs
   `dotnet test`.
 - Add `Microsoft.EntityFrameworkCore` logging redaction for PII.
