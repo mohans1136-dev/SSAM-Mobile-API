@@ -482,5 +482,6 @@ $RECYCLE.BIN/
 *.swp
 
 # Local bundle for AVD transfer
+ssam-mobile-api.zip
 connector-distributer-api.zip
 nuget-packages/
