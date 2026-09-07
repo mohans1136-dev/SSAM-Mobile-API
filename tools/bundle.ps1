@@ -1,10 +1,10 @@
 # Creates a clean zip of the repo (no bin/obj/.git/.vs) for copying into the AVD.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$out  = Join-Path $root 'connector-distributer-api.zip'
+$out  = Join-Path $root 'ssam-mobile-api.zip'
 if (Test-Path $out) { Remove-Item $out }
 
-$exclude = @('\\bin\\', '\\obj\\', '\\.git\\', '\\.vs\\', '\\.idea\\', 'connector-distributer-api\.zip')
+$exclude = @('\\bin\\', '\\obj\\', '\\.git\\', '\\.vs\\', '\\.idea\\', 'ssam-mobile-api\.zip')
 $files = Get-ChildItem -Path $root -Recurse -File |
     Where-Object { $p = $_.FullName; -not ($exclude | Where-Object { $p -match $_ }) }
 

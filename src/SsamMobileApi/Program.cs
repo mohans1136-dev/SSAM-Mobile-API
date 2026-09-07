@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 using Asp.Versioning;
-using ConnectorDistributor.Api.Data;
-using ConnectorDistributor.Api.Infrastructure;
-using ConnectorDistributor.Api.Services;
+using SsamMobileApi.Data;
+using SsamMobileApi.Infrastructure;
+using SsamMobileApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
@@ -107,7 +107,7 @@ try
     {
         options.AddDocumentTransformer((doc, ctx, ct) =>
         {
-            doc.Info.Title = "Connector Distributor API";
+            doc.Info.Title = "SSAM Mobile API";
             doc.Info.Version = "v1";
             return Task.CompletedTask;
         });

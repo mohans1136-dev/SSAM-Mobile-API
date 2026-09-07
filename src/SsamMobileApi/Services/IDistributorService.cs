@@ -1,6 +1,6 @@
-using ConnectorDistributor.Api.Models;
+using SsamMobileApi.Models;
 
-namespace ConnectorDistributor.Api.Services;
+namespace SsamMobileApi.Services;
 
 public interface IDistributorService
 {

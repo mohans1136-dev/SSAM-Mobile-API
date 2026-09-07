@@ -1,0 +1,27 @@
+@host = http://localhost:5199
+@token = paste-an-entra-id-jwt-here
+
+### OpenAPI document (anonymous in Development)
+GET {{host}}/openapi/v1.json
+
+### Health check (anonymous)
+GET {{host}}/health
+
+### List distributors (requires bearer token)
+GET {{host}}/api/v1/distributors?page=1&pageSize=50
+Authorization: Bearer {{token}}
+
+### Get one
+GET {{host}}/api/v1/distributors/1
+Authorization: Bearer {{token}}
+
+### Create
+POST {{host}}/api/v1/distributors
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Acme Connectors",
+  "region": "APAC",
+  "isActive": true
+}

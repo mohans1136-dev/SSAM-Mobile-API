@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ConnectorDistributor.Api.Models;
+namespace SsamMobileApi.Models;
 
 /// <summary>
 /// DTOs (Data Transfer Objects) are the shapes the API exposes over HTTP.

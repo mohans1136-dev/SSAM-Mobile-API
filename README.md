@@ -1,4 +1,4 @@
-# Connector Distributor API
+# SSAM Mobile API
 
 Secure .NET 10 Web API over an existing MS SQL database, hosted on Azure App
 Service via Azure DevOps, consumed by an OutSystems app using Entra ID
@@ -9,13 +9,13 @@ Service via Azure DevOps, consumed by an OutSystems app using Entra ID
 ## 1. What's in here
 
 ```
-Connector-distributer-api/
-├─ ConnectorDistributor.slnx            Solution file
+SSAM-Mobile-API/
+├─ SsamMobileApi.slnx                   Solution file
 ├─ azure-pipelines.yml                  Azure DevOps CI/CD pipeline
 ├─ .config/dotnet-tools.json            Pins the `dotnet ef` CLI version
 ├─ .gitignore
-└─ src/ConnectorDistributor.Api/
-   ├─ ConnectorDistributor.Api.csproj   Project + NuGet package versions
+└─ src/SsamMobileApi/
+   ├─ SsamMobileApi.csproj   Project + NuGet package versions
    ├─ Program.cs                        App startup / all wiring
    ├─ appsettings.json                  Config template (no secrets)
    ├─ appsettings.Development.json       Local dev overrides
@@ -50,7 +50,7 @@ session policy allows:
 | Method | How |
 | --- | --- |
 | **Clipboard file copy** (most AVD setups) | Select all files in this folder in Explorer, Ctrl+C, paste into the empty project folder in the AVD. |
-| **Zip via clipboard** | Run `powershell -ExecutionPolicy Bypass -File tools\bundle.ps1` — it writes `connector-distributer-api.zip` with `bin/obj/.git` excluded. Copy that one file in and extract. |
+| **Zip via clipboard** | Run `powershell -ExecutionPolicy Bypass -File tools\bundle.ps1` — it writes `ssam-mobile-api.zip` with `bin/obj/.git` excluded. Copy that one file in and extract. |
 | **Text-only clipboard** | Recreate each file by hand in Visual Studio using the tree above, pasting file contents one at a time. Start with `.csproj`, then `Program.cs`, then the folders. |
 
 ### After the files are in the AVD
@@ -76,7 +76,7 @@ variables** (Azure).
 
 ### Local development
 
-From `src/ConnectorDistributor.Api/`:
+From `src/SsamMobileApi/`:
 
 ```bash
 dotnet user-secrets init
@@ -105,7 +105,7 @@ never get committed or copied by accident.
 ## 4. Generate entities from the existing database
 
 Because the schema already exists, use **database-first** scaffolding. Run from
-`src/ConnectorDistributor.Api/`:
+`src/SsamMobileApi/`:
 
 ```bash
 dotnet tool restore
@@ -113,8 +113,8 @@ dotnet ef dbcontext scaffold "Name=ConnectionStrings:SqlDb" Microsoft.EntityFram
   --context AppDbContext \
   --context-dir Data \
   --output-dir Data/Entities \
-  --namespace ConnectorDistributor.Api.Data.Entities \
-  --context-namespace ConnectorDistributor.Api.Data \
+  --namespace SsamMobileApi.Data.Entities \
+  --context-namespace SsamMobileApi.Data \
   --no-onconfiguring \
   --data-annotations \
   --force
@@ -192,7 +192,7 @@ against it.
 
 ### Create once (Azure Portal or CLI)
 
-- **Resource group** e.g. `rg-connector-distributor`
+- **Resource group** e.g. `rg-ssam-mobile-api`
 - **App Service plan** (Linux, B1 to start; scale up later)
 - **App Service (Web App)** runtime **.NET 10**
 - On the Web App:
@@ -228,7 +228,7 @@ App Service on `main`.
 ## 8. Running locally
 
 ```bash
-cd src/ConnectorDistributor.Api
+cd src/SsamMobileApi
 dotnet run
 ```
 
@@ -249,7 +249,7 @@ Options:
 
 ## 9. Suggested next steps
 
-- Add an xUnit test project (`tests/ConnectorDistributor.Api.Tests`) with
+- Add an xUnit test project (`tests/SsamMobileApi.Tests`) with
   `WebApplicationFactory<Program>` integration tests — the pipeline already runs
   `dotnet test`.
 - Add `Microsoft.EntityFrameworkCore` logging redaction for PII.

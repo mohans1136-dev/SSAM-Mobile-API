@@ -1,4 +1,4 @@
-namespace ConnectorDistributor.Api.Data.Entities;
+namespace SsamMobileApi.Data.Entities;
 
 /// <summary>
 /// Example entity. After you scaffold from the real database this file will be

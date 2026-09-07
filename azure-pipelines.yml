@@ -20,9 +20,9 @@ variables:
   buildConfiguration: 'Release'
   dotnetVersion: '10.0.x'
   azureSubscription: 'azure-svc-connection'      # <-- service connection name
-  appServiceName: 'connector-distributor-api'     # <-- your App Service name
+  appServiceName: 'ssam-mobile-api'     # <-- your App Service name
   # Path to the API project relative to repo root
-  apiProject: 'src/ConnectorDistributor.Api/ConnectorDistributor.Api.csproj'
+  apiProject: 'src/SsamMobileApi/SsamMobileApi.csproj'
 
 stages:
 # ==========================================================================

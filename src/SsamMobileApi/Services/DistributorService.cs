@@ -1,9 +1,9 @@
-using ConnectorDistributor.Api.Data;
-using ConnectorDistributor.Api.Data.Entities;
-using ConnectorDistributor.Api.Models;
+using SsamMobileApi.Data;
+using SsamMobileApi.Data.Entities;
+using SsamMobileApi.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ConnectorDistributor.Api.Services;
+namespace SsamMobileApi.Services;
 
 /// <summary>
 /// Business logic + data access for distributors. Controllers stay thin and

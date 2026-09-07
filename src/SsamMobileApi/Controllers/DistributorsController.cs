@@ -1,10 +1,10 @@
 using Asp.Versioning;
-using ConnectorDistributor.Api.Models;
-using ConnectorDistributor.Api.Services;
+using SsamMobileApi.Models;
+using SsamMobileApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ConnectorDistributor.Api.Controllers;
+namespace SsamMobileApi.Controllers;
 
 [ApiController]
 [ApiVersion("1.0")]
