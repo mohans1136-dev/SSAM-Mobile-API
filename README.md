@@ -61,6 +61,8 @@ session policy allows:
 | **Zip via clipboard** | Run `powershell -ExecutionPolicy Bypass -File tools\bundle.ps1` — it writes `ssam-mobile-api.zip` with `bin/obj/.git` excluded. Copy that one file in and extract. |
 | **Text-only clipboard** | Recreate each file by hand in Visual Studio using the tree above, pasting file contents one at a time. Start with `.csproj`, then `Program.cs`, then the folders. |
 
+Full walkthrough (clone vs zip, restore, point at the real DB, verify, push back): **[docs/migrate-to-avd.md](docs/migrate-to-avd.md)**.
+
 ### After the files are in the AVD
 
 1. Open the `.slnx` (or the `.csproj`) in Visual Studio.
