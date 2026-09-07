@@ -4,8 +4,11 @@
 ### OpenAPI document (anonymous in Development)
 GET {{host}}/openapi/v1.json
 
-### Health check (anonymous)
-GET {{host}}/health
+### Is the process up?
+GET {{host}}/health/live
+
+### Is the database reachable? (runs SELECT 1)
+GET {{host}}/health/db
 
 ### List distributors (requires bearer token)
 GET {{host}}/api/v1/distributors?page=1&pageSize=50

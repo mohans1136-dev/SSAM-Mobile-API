@@ -4,6 +4,7 @@ using SsamMobileApi.Data;
 using SsamMobileApi.Infrastructure;
 using SsamMobileApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Scalar.AspNetCore;
@@ -142,7 +143,7 @@ try
     // Health checks - Azure App Service / load balancer pings /health.
     // -----------------------------------------------------------------------
     builder.Services.AddHealthChecks()
-        .AddDbContextCheck<AppDbContext>(name: "sql-db");
+        .AddCheck<DatabaseHealthCheck>("sql-db", tags: ["db", "ready"]);
 
     // -----------------------------------------------------------------------
     // Application services (your business logic lives behind these interfaces)
@@ -176,7 +177,19 @@ try
     app.UseAuthorization();
 
     app.MapControllers();
-    app.MapHealthChecks("/health").AllowAnonymous();
+
+    // Full exception/server detail in the JSON only outside Production.
+    var verboseHealth = !app.Environment.IsProduction();
+
+    // Liveness: is the process up? (checks no dependencies)
+    app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false })
+        .AllowAnonymous();
+
+    // Readiness + DB connectivity: runs "SELECT 1" against SQL, returns JSON.
+    // Use /health/db to confirm the API can talk to the database.
+    app.MapHealthChecks("/health", HealthCheckResponse.Options(verboseHealth)).AllowAnonymous();
+    app.MapHealthChecks("/health/db",
+        HealthCheckResponse.Options(verboseHealth, c => c.Tags.Contains("db"))).AllowAnonymous();
 
     app.Run();
 }

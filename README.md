@@ -246,7 +246,7 @@ against it.
   - *Identity → System-assigned* → On. Grant this managed identity access to the
     SQL DB (recommended) or to a Key Vault holding the secrets.
   - *TLS/SSL settings*: HTTPS Only = On, min TLS 1.2.
-  - *Health check*: path `/health`.
+  - *Health check*: path `/health/db` (fails over to a new instance if SQL is unreachable).
 - **SQL**: allow the App Service to reach it (VNet integration + private endpoint,
   or "Allow Azure services"). Prefer **managed identity** auth over SQL logins:
   connection string `Server=tcp:...;Authentication=Active Directory Managed Identity;Encrypt=True;Database=...`.
@@ -276,8 +276,39 @@ dotnet run
 ```
 
 Opens `https://localhost:7199/scalar` — an interactive API console. Use the
-"Authorize" button with a real Entra ID token to call secured endpoints.
-`GET /health` reports DB connectivity.
+"Authorize" button with a real Entra ID token to call secured endpoints (or
+leave `DevAuth:Enabled` on to skip that locally).
+
+### Checking the database connection through the API
+
+All endpoints are anonymous — call them from a browser, `curl`, or the `.http`
+file.
+
+| Endpoint | Purpose | Response |
+| --- | --- | --- |
+| `GET /health/live` | Is the process up? Checks nothing else. | `Healthy` / 200 |
+| `GET /health/db` | Opens a SQL connection and runs `SELECT 1`. | JSON, 200 if OK / 503 if not |
+| `GET /health` | Same as `/health/db` today (all checks). | JSON |
+
+Healthy response:
+
+```json
+{
+  "status": "Healthy",
+  "checks": [
+    { "name": "sql-db", "status": "Healthy", "description": "Database connection OK.",
+      "data": { "server": "(localdb)\\MSSQLLocalDB", "database": "SsamMobileApiLocal", "responseMs": 12 } }
+  ]
+}
+```
+
+Failed response (HTTP 503) — in Development/Staging the `error` field carries the
+real SQL message (`Cannot open database ...`, `Login failed ...`, timeout, etc.).
+In Production only `status` is shown, to avoid leaking server internals.
+
+The check lives in `Infrastructure/DatabaseHealthCheck.cs`. Point Azure App
+Service's **Health check** setting at `/health/db` so a bad connection string or
+firewall rule fails the deployment instead of serving errors.
 
 ### AVD with no nuget.org access
 
