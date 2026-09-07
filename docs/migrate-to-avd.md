@@ -73,9 +73,11 @@ SSAMMobileApp/
 
 ---
 
-## Step 3 — Restore
+## Step 3 — Restore NuGet packages
 
-Open `P:\Core\SSAMMobileApp\SSAMMobileApp.sln` in Visual Studio, then:
+Open `P:\Core\SSAMMobileApp\SSAMMobileApp.sln` in Visual Studio.
+
+### If the AVD can reach nuget.org
 
 ```powershell
 cd P:\Core\SSAMMobileApp
@@ -83,9 +85,56 @@ dotnet restore
 dotnet tool restore        # the `dotnet ef` CLI, for Step 6
 ```
 
-Package versions are pinned in `SSAMMobileApp-API\SSAMMobileApp-API.csproj`. If
-the AVD can't reach nuget.org, see README section 8 (internal feed, or carry a
-`nuget-packages` folder in).
+### If it can't (the usual case — see the error below)
+
+Visual Studio shows package-restore errors, or a prompt to install components it
+can't download. The fix is to carry the packages in as files.
+
+**First, check whether a feed is reachable** (any of these avoids carrying files):
+
+| Try from the AVD browser | If it works |
+| --- | --- |
+| `https://dev.azure.com/<your-org>` | Create an **Azure Artifacts** feed with **nuget.org as an upstream source**, then add its URL to `nuget.config`. Restore pulls through it. |
+| An internal company NuGet URL (ask IT) | Put that URL in `nuget.config` as the only `<packageSource>`. |
+| Nothing | Use the offline bundle below. |
+
+**Offline bundle (always works):**
+
+1. **Outside the AVD**, from the repo root:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File tools\pack-offline-nuget.ps1
+   ```
+
+   Produces `offline-nuget.zip` (~265 MB) — every package the solution needs,
+   plus a `nuget.config`.
+
+2. Copy `offline-nuget.zip` into the AVD and **extract it into
+   `P:\Core\SSAMMobileApp\`**. You now have:
+
+   ```
+   P:\Core\SSAMMobileApp\_offline-nuget\    (all packages)
+   P:\Core\SSAMMobileApp\nuget.config       (points restore at that folder, no network)
+   ```
+
+3. Restore — now fully offline:
+
+   ```powershell
+   cd P:\Core\SSAMMobileApp
+   dotnet restore
+   dotnet tool restore
+   ```
+
+   In Visual Studio: **Tools → NuGet Package Manager → Package Manager Settings →
+   Clear All NuGet Cache(s)** is *not* needed; just **Build → Rebuild Solution**.
+
+> The bundled `nuget.config` clears all online sources. When you later get feed
+> access, replace it with a `<packageSources>` entry for that feed.
+
+> The `.NET desktop development` workload the VS Installer offers is **not**
+> needed for this Web API (that's for WPF/WinForms). What you need is the
+> **.NET 10 SDK** — if the installer is trying to fetch that and can't, ask IT to
+> install "ASP.NET and web development" + the .NET 10 SDK from an approved source.
 
 ---
 

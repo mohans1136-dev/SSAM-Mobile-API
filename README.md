@@ -319,12 +319,10 @@ Full step-by-step (local, AVD, and Azure): **[docs/verify-db-connection.md](docs
 
 ### AVD with no nuget.org access
 
-Options:
-- Configure the AVD's internal NuGet feed (Azure Artifacts) and
-  `dotnet restore` from there.
-- Or, on a machine with internet, run
-  `dotnet restore --packages ./nuget-packages` and copy the `nuget-packages`
-  folder in, then `dotnet restore --source ./nuget-packages`.
+Run `tools\pack-offline-nuget.ps1` outside the AVD to build `offline-nuget.zip`,
+extract it into the solution folder in the AVD, and restore fully offline.
+Full steps + the Azure Artifacts / internal-feed alternatives:
+**[docs/migrate-to-avd.md](docs/migrate-to-avd.md)** Step 3.
 
 ---
 

@@ -485,3 +485,8 @@ $RECYCLE.BIN/
 ssam-mobile-api.zip
 connector-distributer-api.zip
 nuget-packages/
+
+# Offline NuGet bundle for AVD
+_offline-nuget/
+offline-nuget.zip
+nuget.config
