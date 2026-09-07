@@ -47,10 +47,27 @@ try
     // Authentication - validates the OIDC / Microsoft Entra ID bearer token
     // that OutSystems sends in the "Authorization: Bearer <jwt>" header.
     // Settings live in the "AzureAd" section of appsettings.json.
+    //
+    // DevAuth escape hatch: outside the AVD you may have no Entra ID access.
+    // Set "DevAuth:Enabled": true in appsettings.Development.json to bypass token
+    // validation and run as a fake authenticated user. Only honoured in the
+    // Development environment - it can never activate in Azure.
     // -----------------------------------------------------------------------
-    builder.Services
-        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+    var useDevAuth = builder.Environment.IsDevelopment()
+        && builder.Configuration.GetValue<bool>("DevAuth:Enabled");
+
+    if (useDevAuth)
+    {
+        builder.Services
+            .AddAuthentication(DevAuthHandler.SchemeName)
+            .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, DevAuthHandler>(DevAuthHandler.SchemeName, null);
+    }
+    else
+    {
+        builder.Services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+    }
 
     builder.Services.AddAuthorization(options =>
     {
@@ -133,6 +150,9 @@ try
     builder.Services.AddScoped<IDistributorService, DistributorService>();
 
     var app = builder.Build();
+
+    if (useDevAuth)
+        app.Logger.LogWarning("DevAuth is ENABLED - all requests run as a fake authenticated user. Never deploy with this on.");
 
     // -----------------------------------------------------------------------
     // HTTP pipeline. Order matters.

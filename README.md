@@ -102,6 +102,49 @@ never get committed or copied by accident.
 
 ---
 
+## 3b. Developing without access to the real SQL Server
+
+The real database lives in the AVD. Outside it you reproduce it locally with
+**SQL Server LocalDB** — the same SQL Server engine, installed with Visual Studio
+/ the SQL tools, so T-SQL and EF Core behave identically. No Docker needed.
+
+```
+db/
+├─ 01-schema.sql   structure only (sample Distributors table today)
+└─ 02-seed.sql     fake rows for local testing — never real client data
+tools/db-reset.ps1   drops + rebuilds + seeds the local DB
+```
+
+### Make local match production
+
+1. In the AVD: SSMS → right-click the real DB → **Tasks → Generate Scripts** →
+   *schema only* → save the `.sql`. This is table/view/proc **structure**, no
+   client data — safe to bring out. (A DACPAC via **Extract Data-tier
+   Application** works too.)
+2. Copy that file out and replace the body of `db/01-schema.sql` with it.
+3. Rebuild: `powershell -ExecutionPolicy Bypass -File tools\db-reset.ps1`
+
+`appsettings.Development.json` already points at
+`Server=(localdb)\MSSQLLocalDB;Database=SsamMobileApiLocal;...`.
+
+### Running secured endpoints without Entra ID
+
+`appsettings.Development.json` has `"DevAuth": { "Enabled": true }`. In the
+**Development** environment only, this swaps real token validation for a fake
+authenticated user (`Infrastructure/DevAuthHandler.cs`), so you can call
+`/api/v1/distributors` with no `Authorization` header. It **cannot** activate in
+Azure (the check requires `IsDevelopment()`). Set it to `false` when you get a
+real token to test against.
+
+### Scaffolding entities without local DB access
+
+Alternatively, run the `dotnet ef dbcontext scaffold` command (section 4) **once
+inside the AVD**, commit the generated `Data/` files, and pull them out. After
+that the project compiles and runs against LocalDB with no need to touch the real
+database again until its schema changes.
+
+---
+
 ## 4. Generate entities from the existing database
 
 Because the schema already exists, use **database-first** scaffolding. Run from
