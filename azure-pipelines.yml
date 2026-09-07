@@ -1,0 +1,95 @@
+# ---------------------------------------------------------------------------
+# Azure DevOps pipeline: build -> test -> publish artifact -> deploy to App Service
+#
+# One-time setup in Azure DevOps (Project settings):
+#   1. Service connections -> New -> "Azure Resource Manager" -> Workload identity
+#      federation. Name it e.g. "azure-svc-connection". Scope it to the resource
+#      group that holds your App Service.
+#   2. Create an Environment named "production" (Pipelines -> Environments) so the
+#      deploy stage shows up there and you can add approval checks later.
+#
+# Then edit the variables block below.
+# ---------------------------------------------------------------------------
+
+trigger:
+  branches:
+    include:
+      - main
+
+variables:
+  buildConfiguration: 'Release'
+  dotnetVersion: '10.0.x'
+  azureSubscription: 'azure-svc-connection'      # <-- service connection name
+  appServiceName: 'connector-distributor-api'     # <-- your App Service name
+  # Path to the API project relative to repo root
+  apiProject: 'src/ConnectorDistributor.Api/ConnectorDistributor.Api.csproj'
+
+stages:
+# ==========================================================================
+- stage: Build
+  displayName: Build & test
+  jobs:
+    - job: build
+      pool:
+        vmImage: 'windows-latest'
+      steps:
+        - task: UseDotNet@2
+          displayName: Install .NET SDK
+          inputs:
+            packageType: 'sdk'
+            version: '$(dotnetVersion)'
+
+        - script: dotnet restore
+          displayName: Restore
+
+        - script: dotnet build --configuration $(buildConfiguration) --no-restore
+          displayName: Build
+
+        - script: dotnet test --configuration $(buildConfiguration) --no-build --logger trx --results-directory $(Agent.TempDirectory)/testresults
+          displayName: Test
+          continueOnError: false
+
+        - task: PublishTestResults@2
+          condition: succeededOrFailed()
+          inputs:
+            testResultsFormat: 'VSTest'
+            testResultsFiles: '$(Agent.TempDirectory)/testresults/*.trx'
+
+        - script: >
+            dotnet publish $(apiProject)
+            --configuration $(buildConfiguration)
+            --no-build
+            --output $(Build.ArtifactStagingDirectory)/api
+          displayName: Publish
+
+        - task: PublishBuildArtifacts@1
+          displayName: Upload artifact
+          inputs:
+            PathtoPublish: '$(Build.ArtifactStagingDirectory)/api'
+            ArtifactName: 'api'
+
+# ==========================================================================
+- stage: Deploy
+  displayName: Deploy to Azure App Service
+  dependsOn: Build
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+    - deployment: deploy
+      pool:
+        vmImage: 'windows-latest'
+      environment: 'production'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - download: current
+                artifact: api
+
+              - task: AzureWebApp@1
+                displayName: Deploy to App Service
+                inputs:
+                  azureSubscription: '$(azureSubscription)'
+                  appType: 'webApp'
+                  appName: '$(appServiceName)'
+                  package: '$(Pipeline.Workspace)/api'
+                  deploymentMethod: 'auto'
