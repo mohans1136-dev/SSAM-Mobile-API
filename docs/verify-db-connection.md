@@ -93,10 +93,12 @@ reason, e.g.:
 ### 6. (Optional) prove it also serves data
 
 ```powershell
-curl "http://localhost:5199/api/v1/distributors?pageSize=3"
+curl "http://localhost:5199/api/v1/mr?pageSize=3"
+curl "http://localhost:5199/api/v1/mr/1"
 ```
 
-`DevAuth` lets this through with no token. You should get the seeded rows.
+`DevAuth` lets these through with no token. You should get the seeded MR rows
+and, for `/mr/1`, its MRDetail lines.
 
 ---
 

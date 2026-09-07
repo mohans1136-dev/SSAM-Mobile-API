@@ -29,8 +29,8 @@ public sealed class DevAuthHandler(
         {
             new Claim(ClaimTypes.NameIdentifier, "dev-user"),
             new Claim(ClaimTypes.Name, "Local Dev User"),
-            new Claim("scp", "Distributors.Read Distributors.Write"),
-            new Claim("roles", "Distributors.Read")
+            new Claim("scp", "Mr.Read Mr.Write"),
+            new Claim("roles", "Mr.Read")
         };
 
         var identity = new ClaimsIdentity(claims, SchemeName);

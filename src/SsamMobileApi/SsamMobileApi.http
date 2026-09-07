@@ -10,21 +10,18 @@ GET {{host}}/health/live
 ### Is the database reachable? (runs SELECT 1)
 GET {{host}}/health/db
 
-### List distributors (requires bearer token)
-GET {{host}}/api/v1/distributors?page=1&pageSize=50
+### List MR headers (paged, newest first). Filters all optional.
+GET {{host}}/api/v1/mr?page=1&pageSize=50
 Authorization: Bearer {{token}}
 
-### Get one
-GET {{host}}/api/v1/distributors/1
+### List MR with filters
+GET {{host}}/api/v1/mr?customerId=1001&status=1&requestType=Monthly
 Authorization: Bearer {{token}}
 
-### Create
-POST {{host}}/api/v1/distributors
+### One MR header + all its detail lines
+GET {{host}}/api/v1/mr/1
 Authorization: Bearer {{token}}
-Content-Type: application/json
 
-{
-  "name": "Acme Connectors",
-  "region": "APAC",
-  "isActive": true
-}
+### Just the detail lines for one MR
+GET {{host}}/api/v1/mr/1/details
+Authorization: Bearer {{token}}

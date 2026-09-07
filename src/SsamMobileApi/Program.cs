@@ -76,12 +76,12 @@ try
         options.FallbackPolicy = options.DefaultPolicy;
 
         // Example scope-based policy. The app registration in Entra ID exposes
-        // an API scope (e.g. "access_as_app" or "Distributors.Read"); require it here.
+        // an API scope (e.g. "access_as_app" or "Mr.Read"); require it here.
         options.AddPolicy("ReadAccess", policy =>
             policy.RequireAssertion(ctx =>
                 ctx.User.HasClaim(c => (c.Type == "scp" || c.Type == "http://schemas.microsoft.com/identity/claims/scope")
-                    && c.Value.Split(' ').Contains("Distributors.Read"))
-                || ctx.User.HasClaim(c => c.Type == "roles" && c.Value == "Distributors.Read")));
+                    && c.Value.Split(' ').Contains("Mr.Read"))
+                || ctx.User.HasClaim(c => c.Type == "roles" && c.Value == "Mr.Read")));
     });
 
     // -----------------------------------------------------------------------
@@ -148,7 +148,7 @@ try
     // -----------------------------------------------------------------------
     // Application services (your business logic lives behind these interfaces)
     // -----------------------------------------------------------------------
-    builder.Services.AddScoped<IDistributorService, DistributorService>();
+    builder.Services.AddScoped<IMrService, MrService>();
 
     var app = builder.Build();
 

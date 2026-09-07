@@ -6,27 +6,26 @@ namespace SsamMobileApi.Data;
 /// <summary>
 /// EF Core database context - the gateway to the MS SQL database.
 ///
-/// Because the database already exists, you will REPLACE most of this file by
-/// running the scaffold command (see README "Generate entities from the DB").
-/// The scaffolder regenerates the DbSet properties and OnModelCreating mapping
-/// from the real schema. Keep this hand-written version until then so the
-/// project compiles.
+/// Entities under Data/Entities replicate the production [MTL] schema exactly
+/// (see MR.cs / MRDetail.cs). This context is database-first: it never runs
+/// migrations against the real database.
 /// </summary>
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public DbSet<Distributor> Distributors => Set<Distributor>();
+    public DbSet<MR> MR => Set<MR>();
+    public DbSet<MRDetail> MRDetail => Set<MRDetail>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Distributor>(entity =>
-        {
-            entity.ToTable("Distributors");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.Region).HasMaxLength(100);
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
-        });
+        // Most mapping is via data annotations on the entities. Only the bits
+        // that annotations can't express live here.
+        modelBuilder.Entity<MRDetail>()
+            .HasOne(d => d.MR)
+            .WithMany(m => m.MRDetails)
+            .HasForeignKey(d => d.MRId)
+            .HasConstraintName("FK_MRDetail_MR")
+            .OnDelete(DeleteBehavior.Restrict); // no cascade
     }
 }
