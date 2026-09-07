@@ -310,6 +310,8 @@ The check lives in `Infrastructure/DatabaseHealthCheck.cs`. Point Azure App
 Service's **Health check** setting at `/health/db` so a bad connection string or
 firewall rule fails the deployment instead of serving errors.
 
+Full step-by-step (local, AVD, and Azure): **[docs/verify-db-connection.md](docs/verify-db-connection.md)**.
+
 ### AVD with no nuget.org access
 
 Options:
